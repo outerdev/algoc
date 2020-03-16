@@ -1,4 +1,4 @@
-package main
+package prompt
 
 import (
 	. "fmt"
@@ -11,6 +11,8 @@ import (
 	"regexp"
 
 	"github.com/manifoldco/promptui"
+
+	. "github.com/outerdev/algoc/errors"
 )
 
 type ValidateFunc func(string) error
@@ -106,7 +108,7 @@ func getValidations(v reflect.StructField) []ValidateFunc {
 		if validation, ok := validationFuncs[validationTag]; ok {
 			validations = append(validations, validation)
 		} else {
-			panic(errUnrecognizedValidation(validationTag))
+			Fatal(ErrUnrecognizedValidation(validationTag))
 		}
 	}
 
@@ -147,7 +149,7 @@ func fillKeyByPrompt(v reflect.Value, prefix string, key string) error {
 
 		if f.Type.Kind() == reflect.Ptr {
 			if v.Field(i).IsNil() {
-				panic(Sprintf("Field named '%s' can not be nil. Add a default struct value for this field", prefix+f.Name))
+				Fatal(ErrNilFieldNotAllowed(prefix + f.Name))
 				// Fails because the value is unaddressable, is this fixable?
 				// r := reflect.New(f.Type.Elem()).Elem()
 				// v.Field(i).Set(r)
@@ -172,11 +174,11 @@ func fillKeyByPrompt(v reflect.Value, prefix string, key string) error {
 			validations := getValidations(f)
 			valueStr, err := promptValue(prefix+f.Name, validations...)
 			if err != nil {
-				panic(err)
+				Fatal(err)
 			}
 			value, err := valueFromString(f.Type.Kind(), valueStr)
 			if err != nil {
-				panic(err)
+				Fatal(err)
 			}
 			v.Field(i).Set(value)
 
@@ -190,7 +192,7 @@ func fillKeyByPrompt(v reflect.Value, prefix string, key string) error {
 	// If we are looking for a specific key and didn't see it
 	// after looking through all the keys then there was an error
 	if len(key) > 0 {
-		return errKeyNotFound(key)
+		return ErrKeyNotFound(key)
 	} else { // We have set all the keys with action:"prompt" tags
 		return nil
 	}
@@ -202,14 +204,16 @@ func fillAllKeysByPrompt(v reflect.Value) error {
 
 func evaluateValidationsMap(validationsMap ...map[string]ValidateFunc) {
 	if len(validationsMap) > 1 {
-		panic(errOneValidationsMap)
+		Fatal(ErrOneValidationsMap)
 	} else if len(validationsMap) == 1 {
 		for name, validation := range validationsMap[0] {
 			validationFuncs[name] = validation
 		}
 	}
 }
-func PromptForValues(config *Config, validationsMap ...map[string]ValidateFunc) error {
+
+// func PromptForValues(config *Config, validationsMap ...map[string]ValidateFunc) error {
+func PromptForValues(config interface{}, validationsMap ...map[string]ValidateFunc) error {
 
 	evaluateValidationsMap(validationsMap...)
 
@@ -224,7 +228,8 @@ func PromptForValues(config *Config, validationsMap ...map[string]ValidateFunc) 
 }
 
 // PromptForValuesWithKey will prompt and fill a series of values in config
-func PromptForValuesWithKeys(config *Config, keys []string, validationsMap ...map[string]ValidateFunc) error {
+// func PromptForValuesWithKeys(config *Config, keys []string, validationsMap ...map[string]ValidateFunc) error {
+func PromptForValuesWithKeys(config interface{}, keys []string, validationsMap ...map[string]ValidateFunc) error {
 
 	evaluateValidationsMap(validationsMap...)
 
@@ -238,6 +243,7 @@ func PromptForValuesWithKeys(config *Config, keys []string, validationsMap ...ma
 }
 
 // PromptForValuesWithKey will prompt and fill one value in config
-func PromptForValuesWithKey(config *Config, key string, validationsMap ...map[string]ValidateFunc) error {
+// func PromptForValuesWithKey(config *Config, key string, validationsMap ...map[string]ValidateFunc) error {
+func PromptForValuesWithKey(config interface{}, key string, validationsMap ...map[string]ValidateFunc) error {
 	return PromptForValuesWithKeys(config, []string{key}, validationsMap...)
 }

@@ -1,10 +1,12 @@
-package main
+package config
 
 import (
 	"io/ioutil"
 	"os"
 
 	"github.com/go-yaml/yaml"
+
+	. "github.com/outerdev/algoc/errors"
 )
 
 var (
@@ -16,7 +18,7 @@ var (
 )
 
 func IsConfigNotPresent(err error) bool {
-	return err == errFileNotFound
+	return err == ErrFileNotFound
 }
 
 func checkFileSystem(path string, shouldBeDir bool) bool {
@@ -42,7 +44,7 @@ func dirExists(dirPath string) bool {
 func ReadConfigData(filename string) ([]byte, error) {
 
 	if len(filename) <= 1 {
-		return nil, errFileNameInvalid
+		return nil, ErrFileNameInvalid
 	}
 
 	configFolder := filename + "/"
@@ -63,7 +65,7 @@ func ReadConfigData(filename string) ([]byte, error) {
 	}
 
 	if len(filePath) == 0 {
-		return nil, errFileNotFound
+		return nil, ErrFileNotFound
 	}
 
 	return ioutil.ReadFile(filePath)
@@ -72,7 +74,7 @@ func ReadConfigData(filename string) ([]byte, error) {
 func WriteConfig(filename string, config interface{}) error {
 
 	if len(filename) <= 1 {
-		return errFileNameInvalid
+		return ErrFileNameInvalid
 	}
 
 	configFolder := filename + "/"
