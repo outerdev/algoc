@@ -1,6 +1,7 @@
 .idea/
+mydata/
+!Taskfile.yml
 *.bak
 *.sw*
 algoc
 go_build_github_com_outerdev_algoc
-Taskfile.yml
