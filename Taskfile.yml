@@ -12,4 +12,4 @@ tasks:
 
   clean:
     cmds:
-      - go build -o {{.EXE}}
+      - rm {{.EXE}}
