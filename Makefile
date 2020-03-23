@@ -49,7 +49,7 @@ GOLDFLAGS_BASE  := -X github.com/outerdev/algoc/go-algorand/config.BuildNumber=$
 GOLDFLAGS := $(GOLDFLAGS_BASE) \
 		 -X github.com/outerdev/algoc/go-algorand/config.Channel=$(BUILDCHANNEL)
 
-default: build
+default: setup
 
 # tools
 
@@ -73,7 +73,14 @@ deps:
 
 # develop
 
-build: buildsrc gen
+# build:
+	# go build
+
+srcdeps:
+	rm -rf go-algorand
+	git clone https://github.com/algorand/go-algorand
+
+setup: srcdeps buildsrc gen
 
 buildsrc: crypto/libs/$(OS_TYPE)/$(ARCH)/lib/libsodium.a node_exporter NONGO_BIN deps
 	go install $(GOTRIMPATH) $(GOTAGS) $(GOBUILDMODE) -ldflags="$(GOLDFLAGS)" ./...
