@@ -76,13 +76,7 @@ deps:
 build: buildsrc gen
 
 buildsrc: crypto/libs/$(OS_TYPE)/$(ARCH)/lib/libsodium.a node_exporter NONGO_BIN deps
-	echo "Paths"
-	echo "GOTRIMPATH = ${GOTRIMPATH}"
-	echo "GOTAGS = ${GOTAGS}"
-	echo "GOBUILDMODE = ${GOBUILDMODE}"
-	echo "GOLDFLAGS = ${GOLDFLAGS}"
 	go install $(GOTRIMPATH) $(GOTAGS) $(GOBUILDMODE) -ldflags="$(GOLDFLAGS)" ./...
-	# echo "Done!"
 
 NONGO_BIN_FILES=$(GOPATH1)/bin/find-nodes.sh $(GOPATH1)/bin/update.sh $(GOPATH1)/bin/COPYING $(GOPATH1)/bin/ddconfig.sh
 
