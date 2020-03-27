@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	. "fmt"
-
 	"os"
 	"os/signal"
 	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
-	// "github.com/spf13/cobra/doc"
 	"golang.org/x/sys/unix"
 
 	. "github.com/outerdev/algoc/config"
@@ -26,11 +23,6 @@ import (
 const (
 	kmdLogFileName = "kmd.log"
 	kmdLogFilePerm = 0640
-)
-
-var (
-	dataDir     string
-	timeoutSecs uint64
 )
 
 func runKmd(dataDir string, timeoutSecs uint64) {
@@ -76,22 +68,21 @@ func runKmd(dataDir string, timeoutSecs uint64) {
 	}
 
 	// Start the kmd server
-	// died, sock, err := kmd.Start(startConfig)
-	died, _, err := kmd.Start(startConfig)
+	died, sock, err := kmd.Start(startConfig)
 	if err == server.ErrAlreadyRunning {
-		// log.Errorf("couldn't start kmd: %s", err)
+		log.Errorf("couldn't start kmd: %s", err)
 		os.Exit(codes.ExitCodeKMDAlreadyRunning)
 	}
 	if err != nil {
-		// log.Errorf("couldn't start kmd: %s", err)
+		log.Errorf("couldn't start kmd: %s", err)
 		os.Exit(codes.ExitCodeKMDError)
 	}
 
-	// log.Infof("started kmd on sock: %s", sock)
+	log.Infof("started kmd on sock: %s", sock)
 
 	// Wait until the kmd server exits
 	<-died
-	// log.Infof("kmd server died. exiting...")
+	log.Infof("kmd server died. exiting...")
 }
 
 type Config struct {
@@ -99,15 +90,17 @@ type Config struct {
 	Host  string `yaml:"host" action:"prompt,url"`
 }
 
-var config *Config
+var config Config
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if err := LoadConfig(".algoc", &config); IsConfigNotPresent(err) {
+
+	SetConfigFileName("algoc.yaml")
+	if err := LoadConfig(&config); IsConfigNotPresent(err) {
 		if err := PromptForValues(&config); err != nil {
 			Fatal(err)
 		}
-		if err := WriteConfig(".algoc", config); err != nil {
+		if err := WriteConfig(config); err != nil {
 			Fatal(err)
 		}
 	} else if err != nil {
@@ -116,13 +109,22 @@ func initConfig() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	initConfig()
 
-	Println("Running the init...")
-	dataDir := "./mydata"
+	configDir, err := LocateConfigDir()
+	if err != nil {
+		panic(err)
+	}
+
+	dataDir := configDir + "/data"
+	if !DirExists(dataDir) {
+		err := os.Mkdir(dataDir, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	timeoutSecs := uint64(0)
-	Println(dataDir, timeoutSecs)
-
 	runKmd(dataDir, timeoutSecs)
 }
 
@@ -130,8 +132,7 @@ func init() {
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		Println(err)
-		os.Exit(1)
+		Fatal(err)
 	}
 }
 

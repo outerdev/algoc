@@ -9,8 +9,10 @@ import (
 
 var (
 	// Config errors
-	ErrFileNotFound    = errors.New("algoc config does not exist")
-	ErrFileNameInvalid = errors.New("config file name must be at least one letter which is not '.'")
+	ErrFileNotFound              = errors.New("algoc config does not exist")
+	ErrFileNameInvalid           = errors.New("config file name must be at least one letter which is not '.'")
+	ErrOnlySetConfigFilenameOnce = errors.New("config file name may be set only once")
+	ErrConfigFilenameNotSet      = errors.New("config file name must be set")
 
 	// Prompt errors
 	ErrKeyNotFound = func(key string) error {

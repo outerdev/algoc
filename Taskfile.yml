@@ -10,6 +10,11 @@ tasks:
     cmds:
       - go build -o {{.EXE}}
 
+  run:
+    cmds:
+      - ./{{.EXE}}
+    silent: true
+
   clean:
     cmds:
       - rm {{.EXE}}
