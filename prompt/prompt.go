@@ -212,10 +212,8 @@ func evaluateValidationsMap(validationsMap ...map[string]ValidateFunc) {
 	}
 }
 
-// func PromptForValues(config *Config, validationsMap ...map[string]ValidateFunc) error {
 func PromptForValues(config interface{}, validationsMap ...map[string]ValidateFunc) error {
 
-	Printf("config = %+v\n", config)
 	evaluateValidationsMap(validationsMap...)
 
 	// var v reflect.Value
@@ -229,7 +227,6 @@ func PromptForValues(config interface{}, validationsMap ...map[string]ValidateFu
 }
 
 // PromptForValuesWithKey will prompt and fill a series of values in config
-// func PromptForValuesWithKeys(config *Config, keys []string, validationsMap ...map[string]ValidateFunc) error {
 func PromptForValuesWithKeys(config interface{}, keys []string, validationsMap ...map[string]ValidateFunc) error {
 
 	evaluateValidationsMap(validationsMap...)

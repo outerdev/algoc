@@ -1,16 +1,14 @@
 package config
 
 import (
-	// . "fmt"
-
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/go-yaml/yaml"
 
 	. "github.com/outerdev/algoc/errors"
+	"github.com/outerdev/algoc/path"
 )
 
 var configFilename string
@@ -22,9 +20,9 @@ func SetConfigFileName(filename string) {
 	defer configNameMux.Unlock()
 
 	if isConfigFilenameSet {
-		panic(ErrOnlySetConfigFilenameOnce)
+		panic(ErrConfigOnlySetFilenameOnce)
 	} else if len(filename) <= 1 {
-		panic(ErrFileNameInvalid)
+		panic(ErrConfigFileNameInvalid)
 	} else {
 		configFilename = filename
 		isConfigFilenameSet = true
@@ -39,31 +37,7 @@ func GetConfigFilename() string {
 }
 
 func IsConfigNotPresent(err error) bool {
-	return err == ErrFileNotFound
-}
-
-func checkFileSystem(path string, shouldBeDir bool) bool {
-	var info os.FileInfo
-	var err error
-	if info, err = os.Stat(path); os.IsNotExist(err) {
-		return false
-	} else if err != nil {
-		return false
-	}
-
-	if shouldBeDir {
-		return info.IsDir()
-	} else {
-		return !info.IsDir()
-	}
-}
-
-func fileExists(filePath string) bool {
-	return checkFileSystem(filePath, false)
-}
-
-func DirExists(dirPath string) bool {
-	return checkFileSystem(dirPath, true)
+	return err == ErrConfigFileNotFound
 }
 
 func getDirPaths(basename, extension string) ([]string, error) {
@@ -87,22 +61,9 @@ func getDirPaths(basename, extension string) ([]string, error) {
 	return dirPaths, nil
 }
 
-func getBaseAndExtension(filename string) (string, string) {
-	var basename string
-	extension := filepath.Ext(filename)
-	if len(extension) == 0 {
-		basename = filename
-		extension = ".yaml"
-	} else {
-		basename = filename[:len(filename)-len(extension)]
-	}
-
-	return basename, extension
-}
-
 func defaultConfigDir(filename string) (string, error) {
 
-	basename, extension := getBaseAndExtension(filename)
+	basename, extension := path.BaseAndExtension(filename)
 
 	dirPaths, err := getDirPaths(basename, extension)
 	if err != nil {
@@ -119,7 +80,7 @@ func LocateConfigDir() (string, error) {
 		return "", ErrConfigFilenameNotSet
 	}
 
-	basename, extension := getBaseAndExtension(filename)
+	basename, extension := path.BaseAndExtension(filename)
 
 	dirPaths, err := getDirPaths(basename, extension)
 	if err != nil {
@@ -128,14 +89,14 @@ func LocateConfigDir() (string, error) {
 
 	var existingDirPath string
 	for _, dirPath := range dirPaths {
-		if DirExists(dirPath) {
+		if path.DirExists(dirPath) {
 			existingDirPath = dirPath
 			break
 		}
 	}
 
 	if len(existingDirPath) == 0 {
-		return "", ErrFileNotFound
+		return "", ErrConfigFileNotFound
 	}
 
 	return existingDirPath, nil
@@ -143,7 +104,7 @@ func LocateConfigDir() (string, error) {
 
 func locateConfigPath(filename string) (string, error) {
 
-	basename, extension := getBaseAndExtension(filename)
+	basename, extension := path.BaseAndExtension(filename)
 
 	existingDirPath, err := LocateConfigDir()
 	if err != nil {
@@ -151,8 +112,8 @@ func locateConfigPath(filename string) (string, error) {
 	}
 
 	fullPath := existingDirPath + "/" + basename + extension
-	if !fileExists(fullPath) {
-		return "", ErrFileNotFound
+	if !path.FileExists(fullPath) {
+		return "", ErrConfigFileNotFound
 	}
 
 	return fullPath, nil
@@ -187,14 +148,14 @@ func WriteConfig(config interface{}) error {
 			return err
 		}
 
-		if !DirExists(fileDir) {
+		if !path.DirExists(fileDir) {
 			err = os.Mkdir(fileDir, 0755)
 			if err != nil {
 				return err
 			}
 		}
 
-		basename, extension := getBaseAndExtension(filename)
+		basename, extension := path.BaseAndExtension(filename)
 		filePath = fileDir + "/" + basename + extension
 	}
 

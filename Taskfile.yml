@@ -13,6 +13,11 @@ tasks:
   run:
     cmds:
       - ./{{.EXE}}
+    # silent: true
+
+  test:
+    cmds:
+      - go test ./...
     silent: true
 
   clean:

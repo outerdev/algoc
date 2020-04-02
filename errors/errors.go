@@ -9,10 +9,13 @@ import (
 
 var (
 	// Config errors
-	ErrFileNotFound              = errors.New("algoc config does not exist")
-	ErrFileNameInvalid           = errors.New("config file name must be at least one letter which is not '.'")
-	ErrOnlySetConfigFilenameOnce = errors.New("config file name may be set only once")
+	ErrConfigFileNotFound        = errors.New("algoc config does not exist")
+	ErrConfigFileNameInvalid     = errors.New("config file name must be at least one letter which is not '.'")
+	ErrConfigOnlySetFilenameOnce = errors.New("config file name may be set only once")
 	ErrConfigFilenameNotSet      = errors.New("config file name must be set")
+
+	// Path errors
+	ErrFileNotFound = errors.New("file does not exist")
 
 	// Prompt errors
 	ErrKeyNotFound = func(key string) error {
@@ -23,11 +26,11 @@ var (
 	}
 	ErrOneValidationsMap  = errors.New("One validations map is the maximum")
 	ErrNilFieldNotAllowed = func(s string) error {
-		return errors.New(Sprintf("Field named '%s' can not be nil. Add a default struct value for this field"))
+		return errors.New(Sprintf("Field named '%s' can not be nil. Add a default struct value for this field", s))
 	}
 )
 
 func Fatal(err error) {
-	Println(err)
+	panic(err)
 	os.Exit(1)
 }
