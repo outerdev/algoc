@@ -4,8 +4,8 @@ depsrc:
 	@echo
 	@echo "Getting the go-algorand submodule..."
 	@echo
-	rm -rf go-algorand
-	git clone https://github.com/algorand/go-algorand
+	git submodule init
+	git submodule update
 	@echo "===================================="
 
 buildsrc:
