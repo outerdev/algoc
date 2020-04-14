@@ -4,8 +4,8 @@ depsrc:
 	@echo
 	@echo "Getting the go-algorand submodule..."
 	@echo
-	git submodule init
-	git submodule update
+	@git submodule init
+	@git submodule update
 	@echo "===================================="
 
 buildsrc:
